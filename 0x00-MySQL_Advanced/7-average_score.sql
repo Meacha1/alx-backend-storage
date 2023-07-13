@@ -5,7 +5,7 @@
 -- Computes and updates the average score for the user with the given user_id
 -- If there are no corrections for the user, the average score is set to 0
 
-DELIMITER //
+DELIMITER $$
 
 CREATE PROCEDURE ComputeAverageScoreForUser(IN user_id INT)
 BEGIN
@@ -30,6 +30,6 @@ BEGIN
     UPDATE users
     SET average_score = avg_score
     WHERE id = user_id;
-END //
+END $$
 
 DELIMITER ;
