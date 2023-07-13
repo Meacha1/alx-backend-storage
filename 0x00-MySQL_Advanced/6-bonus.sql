@@ -1,12 +1,12 @@
 --SQL script that creates a stored procedure AddBonus that adds a new correction for a student
 DELIMITER $$
 CREATE PROCEDURE AddBonus(
-    IN user_id INT, 
+    IN user_id INTEGER, 
     IN project_name VARCHAR(255),
-    IN score INT
+    IN score INTEGER
 )
 BEGIN
-  DECLARE project_id INT;
+  DECLARE project_id INTEGER;
 
   SELECT id INTO project_id
   FROM projects
@@ -22,5 +22,5 @@ BEGIN
   INSERT INTO corrections (user_id, project_id, score)
   VALUES (user_id, project_id, score);
 
-END$$
+END $$
 DELIMITER ;
