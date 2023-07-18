@@ -5,7 +5,7 @@ Script that provides statistics about Nginx logs stored in MongoDB.
 from pymongo import MongoClient
 
 
-def log_stats():
+if __name__ == "__main__":
     """
     Retrieves statistics about Nginx logs from MongoDB and displays the results.
     """
@@ -26,7 +26,3 @@ def log_stats():
     # Get the count of logs with method=GET and path=/status
     count_status_check = collection.count_documents({"method": "GET", "path": "/status"})
     print(f"{count_status_check} status check")
-
-
-if __name__ == "__main__":
-    log_stats()
