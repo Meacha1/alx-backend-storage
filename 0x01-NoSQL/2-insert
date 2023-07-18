@@ -1,2 +1,2 @@
 // script that inserts a document in the collection school
-echo 'db.school.insertOne({ "name": "Holberton school" })' | mongo "$1"
+db.school.insertOne({ "name": "Holberton school" })
