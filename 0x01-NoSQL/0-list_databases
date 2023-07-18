@@ -1,5 +1,2 @@
-#!/bin/bash
-
-# Save as list_databases.sh
-
-mongo --quiet --eval 'db.adminCommand({ listDatabases: 1 })' | grep name | awk '{print $3}'
+// List all the databases
+show dbs
