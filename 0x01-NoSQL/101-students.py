@@ -2,7 +2,6 @@
 """
 Function that returns all students sorted by average score.
 """
-from pymongo import MongoClient
 
 
 def top_students(mongo_collection):
