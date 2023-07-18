@@ -4,7 +4,7 @@ Module that provides a function to return a list of schools having a specific to
 """
 
 
-def schools_by_topic(mongo_collection, topic) ->:
+def schools_by_topic(mongo_collection, topic):
     """
     Returns a list of schools having a specific topic.
 
