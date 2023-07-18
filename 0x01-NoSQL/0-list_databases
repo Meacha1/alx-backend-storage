@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Save as list_databases.sh
+
+echo "MongoDB Databases:"
+
+mongo --eval 'db.adminCommand("listDatabases");' | grep -v DATABASE |\
+sed -e 's/  "name" : /  /' -e 's/"//g' -e 's/,//'
