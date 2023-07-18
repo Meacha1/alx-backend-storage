@@ -5,24 +5,41 @@ Script that provides statistics about Nginx logs stored in MongoDB.
 from pymongo import MongoClient
 
 
-def count_documents(mongo_collection, query):
+if __name__ == "__main__":
     """
     Counts the number of documents in the collection that match the given query.
     Returns the count.
     """
-    return mongo_collection.count_documents(query)
+    client = MongoClient('mongodb://127.0.0.1:27017')
+    collection = client.logs.nginx
 
+    print(f"{collection.estimated_document_count()} logs")
 
-def get_top_ips(mongo_collection, limit=10):
-    """
-    Retrieves the top N most present IPs in the collection.
-    Returns a list of tuples containing the IP and its count.
-    """
-    pipeline = [
-        {"$group": {"_id": "$ip", "count": {"$sum": 1}}},
+    print("Methods:")
+    for method in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
+        method_count = collection.count_documents({'method': method})
+        print(f"\tmethod {method}: {method_count}")
+
+    check_get = collection.count_documents({
+        'method': 'GET', 'path': "/status"
+    })
+    print(f"{check_get} status check")
+
+    print("IPs:")
+    top_ips = collection.aggregate([
+        {"$group":
+            {
+                "_id": "$ip",
+                "count": {"$sum": 1}
+            }
+        },
         {"$sort": {"count": -1}},
-        {"$limit": limit}
-    ]
-    result = mongo_collection.aggregate(pipeline)
-    top_ips = [(entry['_id'], entry['count']) for entry in result]
-    return top_ips
+        {"$limit": 10},
+        {"$project": {
+            "_id": 0,
+            "ip": "$_id",
+            "count": 1
+        }}
+    ])
+    for ip in top_ips:
+        print(f"\t{ip.get('ip')}: {ip.get('count')}")
