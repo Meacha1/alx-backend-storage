@@ -12,14 +12,12 @@ from typing import Callable
 # Redis instance for caching and tracking
 redis_client = redis.Redis()
 
-
 def cache_response(method: Callable) -> Callable:
     '''
-    Caches the output of fetched data and tracks the
-    number of requests made to a URL.
+    Caches the output of fetched data and tracks the number of requests made to a URL.
     '''
     @wraps(method)
-    def wrapper(url: str) -> str:
+    def wrapper(url) -> str:
         '''
         Wrapper function for caching the output and tracking the request.
         '''
@@ -31,8 +29,7 @@ def cache_response(method: Callable) -> Callable:
         if result:
             return result.decode('utf-8')
 
-        # Fetch the data if not cached, and store it
-        # in Redis with an expiration time of 10 seconds
+        # Fetch the data if not cached, and store it in Redis with an expiration time of 10 seconds
         result = method(url)
         redis_client.set(f'count:{url}', 0)
         redis_client.setex(f'result:{url}', 10, result)
@@ -45,7 +42,6 @@ def cache_response(method: Callable) -> Callable:
 @cache_response
 def get_page(url: str) -> str:
     '''
-    Fetches the content of a URL and returns it, caching
-    the response and tracking the request count.
+    Fetches the content of a URL and returns it, caching the response and tracking the request count.
     '''
     return requests.get(url).text
