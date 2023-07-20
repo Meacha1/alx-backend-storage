@@ -4,10 +4,54 @@ Web Tools Module - Caching and Request Tracking Utilities
 '''
 import redis
 import requests
+import time
+from functools import wraps
+from typing import Callable
 
 # Create a Redis client
 redis_client = redis.Redis()
 
+def caching_decorator(expiration_time: int):
+    """
+    Caching decorator to cache the function results with an expiration time.
+
+    Args:
+        expiration_time (int): The time in seconds for which the result should be cached.
+
+    Returns:
+        Callable: The wrapped function that caches the results.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(url: str) -> str:
+            """
+            Wrapper function for caching the output and tracking the number of accesses.
+
+            Args:
+                url (str): The URL to fetch the HTML content from.
+
+            Returns:
+                str: The HTML content of the URL.
+            """
+            # Increment the number of accesses for the URL
+            redis_client.incr(f'count:{url}')
+
+            # Check if the result is already cached
+            result = redis_client.get(f'content:{url}')
+            if result:
+                return result.decode('utf-8')
+
+            # Fetch the data if not cached, and store it in Redis with an expiration time of 10 seconds
+            result = func(url)
+            redis_client.setex(f'content:{url}', expiration_time, result)
+
+            return result
+
+        return wrapper
+
+    return decorator
+
+@caching_decorator(expiration_time=10)
 def get_page(url: str) -> str:
     """
     Fetches the HTML content of a particular URL and returns it.
@@ -18,27 +62,5 @@ def get_page(url: str) -> str:
     Returns:
         str: The HTML content of the URL.
     """
-    # Check if the result is already cached
-    result = redis_client.get(f'cache:{url}')
-    if result:
-        return result.decode('utf-8')
-
-    # Fetch the data if not cached, and store it in Redis with an expiration time of 10 seconds
     response = requests.get(url)
-    result = response.text
-    redis_client.setex(f'cache:{url}', 10, result)
-
-    # Increment the number of requests made to the URL
-    redis_client.incr(f'count:{url}')
-
-    return result
-
-# Example usage
-if __name__ == "__main__":
-    url = "http://slowwly.robertomurray.co.uk/delay/1000/url/https://www.example.com"
-    for i in range(5):
-        content = get_page(url)
-        print(f"Access {i + 1}: {content}")
-
-    access_count = redis_client.get(f"count:{url}")
-    print(f"Number of accesses for {url}: {int(access_count)}")
+    return response.text
