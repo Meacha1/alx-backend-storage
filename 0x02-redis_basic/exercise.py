@@ -75,13 +75,13 @@ class Cache:
 
 def count_calls(method: Callable) -> Callable:
     """
-    Decorator to count how many times a method is called.
+    Decorator that counts the number of times a method is called.
 
     Args:
         method (Callable): The method to be decorated.
 
     Returns:
-        Callable: The decorated method.
+        Callable: The wrapped function that increments the count and returns the original method's return value.
     """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
