@@ -121,10 +121,3 @@ def replay(func: Callable) -> None:
 
     for input_args, output in zip(inputs, outputs):
         print("{}{} -> {}".format(func.__qualname__, input_args.decode("utf-8"), output.decode("utf-8")))
-
-# Usage example
-cache = Cache()
-cache.store("foo")
-cache.store("bar")
-cache.store(42)
-replay(cache.store)
