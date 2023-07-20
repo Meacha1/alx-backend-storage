@@ -8,11 +8,13 @@ from typing import Any, Callable, Union
 
 
 def count_calls(method: Callable) -> Callable:
-    '''Decorator that tracks the number of calls made to a method in a Cache class.
+    '''Decorator that tracks the number of calls
+       made to a method in a Cache class.
     '''
     @wraps(method)
     def invoker(self, *args, **kwargs) -> Any:
-        '''Wrapper function that invokes the given method after incrementing its call counter.
+        '''Wrapper function that invokes the given
+           method after incrementing its call counter.
         '''
         if isinstance(self._redis, redis.Redis):
             self._redis.incr(method.__qualname__)
@@ -25,7 +27,8 @@ def call_history(method: Callable) -> Callable:
     '''
     @wraps(method)
     def invoker(self, *args, **kwargs) -> Any:
-        '''Wrapper function that returns the method's output after storing its inputs and output.
+        '''Wrapper function that returns the method's
+           output after storing its inputs and output.
         '''
         in_key = '{}:inputs'.format(method.__qualname__)
         out_key = '{}:outputs'.format(method.__qualname__)
@@ -75,7 +78,8 @@ class Cache:
     @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
-        '''Method that stores a value in the Redis data storage and returns the key.
+        '''Method that stores a value in the Redis
+           data storage and returns the key.
         '''
         data_key = str(uuid.uuid4())
         self._redis.set(data_key, data)
