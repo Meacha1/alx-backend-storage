@@ -62,3 +62,14 @@ def get_page(url: str) -> str:
     """
     response = requests.get(url)
     return response.text
+
+# Example usage
+if __name__ == "__main__":
+    url = "http://slowwly.robertomurray.co.uk/delay/1000/url/https://www.example.com"
+    for i in range(5):
+        content = get_page(url)
+        print(f"Access {i + 1}: {content}")
+
+    access_count = redis_client.get(f"count:{url}")
+    print(f"Number of accesses for {url}: {int(access_count)}")
+
