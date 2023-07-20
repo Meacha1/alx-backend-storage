@@ -73,22 +73,31 @@ class Cache:
         """
         return self.get(key, fn=int)
 
-def count_calls(method: Callable) -> Callable:
+def call_history(method: Callable) -> Callable:
     """
-    Decorator that counts the number of times a method is called.
+    Decorator that stores the history of inputs and outputs for a particular function.
 
     Args:
         method (Callable): The method to be decorated.
 
     Returns:
-        Callable: The wrapped function that increments the count and returns the original method's return value.
+        Callable: The wrapped function that appends the input arguments to one list and stores the output into another list.
     """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        key = method.__qualname__
-        self._redis.incr(key)
-        return method(self, *args, **kwargs)
+        input_key = "{}:inputs".format(method.__qualname__)
+        output_key = "{}:outputs".format(method.__qualname__)
+
+        # Convert the input arguments to strings and append to the inputs list
+        input_str = str(args)
+        self._redis.rpush(input_key, input_str)
+
+        # Execute the original method and store the output in the outputs list
+        result = method(self, *args, **kwargs)
+        self._redis.rpush(output_key, result)
+
+        return result
     return wrapper
 
-# Decorate the Cache.store method with count_calls
-Cache.store = count_calls(Cache.store)
+# Decorate the Cache.store method with call_history
+Cache.store = call_history(Cache.store)
