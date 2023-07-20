@@ -103,3 +103,28 @@ def call_history(method: Callable) -> Callable:
 
 # Decorate the Cache.store method with call_history
 Cache.store = call_history(Cache.store)
+
+def replay(func: Callable) -> None:
+    """
+    Display the history of calls for a particular function.
+
+    Args:
+        func (Callable): The function for which to display the history of calls.
+    """
+    inputs_key = "{}:inputs".format(func.__qualname__)
+    outputs_key = "{}:outputs".format(func.__qualname__)
+
+    inputs = cache._redis.lrange(inputs_key, 0, -1)
+    outputs = cache._redis.lrange(outputs_key, 0, -1)
+
+    print("{} was called {} times:".format(func.__qualname__, len(inputs)))
+
+    for input_args, output in zip(inputs, outputs):
+        print("{}{} -> {}".format(func.__qualname__, input_args.decode("utf-8"), output.decode("utf-8")))
+
+# Usage example
+cache = Cache()
+cache.store("foo")
+cache.store("bar")
+cache.store(42)
+replay(cache.store)
