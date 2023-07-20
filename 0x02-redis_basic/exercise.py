@@ -81,22 +81,24 @@ def call_history(method: Callable) -> Callable:
         method (Callable): The method to be decorated.
 
     Returns:
-        Callable: The wrapped function that appends the input arguments to one list and stores the output into another list.
+        Callable: The wrapped function that stores the input and output lists in Redis.
     """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        input_key = "{}:inputs".format(method.__qualname__)
-        output_key = "{}:outputs".format(method.__qualname__)
+        inputs_key = "{}:inputs".format(method.__qualname__)
+        outputs_key = "{}:outputs".format(method.__qualname__)
 
-        # Convert the input arguments to strings and append to the inputs list
-        input_str = str(args)
-        self._redis.rpush(input_key, input_str)
+        # Append input arguments to the input list in Redis
+        self._redis.rpush(inputs_key, str(args))
 
-        # Execute the original method and store the output in the outputs list
-        result = method(self, *args, **kwargs)
-        self._redis.rpush(output_key, result)
+        # Execute the original method to get the output
+        output = method(self, *args, **kwargs)
 
-        return result
+        # Store the output in the output list in Redis
+        self._redis.rpush(outputs_key, output)
+
+        return output
+
     return wrapper
 
 # Decorate the Cache.store method with call_history
