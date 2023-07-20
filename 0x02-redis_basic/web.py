@@ -25,7 +25,7 @@ def caching_decorator(expiration_time: int):
         @wraps(func)
         def wrapper(url: str) -> str:
             """
-            Wrapper function for caching the output and tracking the number of accesses.
+            Wrapper function for caching and tracking the number of accesses.
 
             Args:
                 url (str): The URL to fetch the HTML content from.
@@ -37,18 +37,16 @@ def caching_decorator(expiration_time: int):
             redis_client.incr(f'count:{url}')
 
             # Check if the result is already cached
-            result = redis_client.get(f'content:{url}')
+            result = redis_client.get(f'result:{url}')
             if result:
                 return result.decode('utf-8')
 
-            # Fetch the data if not cached, and store it in Redis with an expiration time of 10 seconds
+            # Fetch the HTML content if not cached, and store it in Redis with an expiration time
             result = func(url)
-            redis_client.setex(f'content:{url}', expiration_time, result)
+            redis_client.setex(f'result:{url}', expiration_time, result)
 
             return result
-
         return wrapper
-
     return decorator
 
 @caching_decorator(expiration_time=10)
